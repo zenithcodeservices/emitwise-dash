@@ -22,3 +22,17 @@
   max-width: 1000px;
   min-width: 200px;
 }
+
+.loading li {
+  list-style-type: none;
+}
+
+.loading {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  height: 500px;
+}

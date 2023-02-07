@@ -5,48 +5,35 @@ import { useEffect, useState } from 'react';
 import {Bar} from 'react-chartjs-2';
 import { CategoryScale, Chart as ChartJS, LinearScale, registerables } from 'chart.js';
 import { Chart } from 'react-chartjs-2'
-
+import LoadingSpin from 'react-loading-spin'
+import { ForkLeft } from '@mui/icons-material';
 
 
 
 export default function Home () {
 
+    const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+
+
+    function parseEmissionData(arr: Array<{date: number, value: number}>) {
+        let result: number[]  = Array(12).fill(0)
+
+        arr.forEach(item => {
+            let date = new Date(item.date * 1000)
+            let month = date.getMonth()
+            result[month] += item.value
+        })
+        console.log(result)
+        return result
+    }
+
 
     ChartJS.register(...registerables);
 
 
-    const graphConfig = {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [{
-            type: 'bar',
-            label: 'Emissions Overview',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-            'rgba(0, 211, 185, 1)',
-            ],
-            borderColor: [
-            'rgba(3, 133, 117, 1)',
-            ],
-            borderWidth: 1,
-            order: 2
-        }, {
-            type: 'line',
-            label: 'Emissions Intensity',
-            data: [20, 18, 22, 40, 10, 5],
-            backgroundColor: [
-                'rgba(167, 97, 193, 1)',
-            ],
-            borderColor: [
-                'rgba(167, 97, 193, 1)',
-            ],
-            borderWidth: 1,
-            order: 1
-        }]
-    }
-
-    const [APICallComplete, setAPICallComplete] = useState(false);
-    const [totalEmissions, setTotalEmissions] = useState([])
-    const [emissionIntensity, setEmissionIntensity] = useState([])
+    const [totalEmissions, setTotalEmissions] = useState<number[]>([])
+    const [emissionIntensity, setEmissionIntensity] = useState<number[]>([])
+    const [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
         callAPI()
@@ -55,6 +42,7 @@ export default function Home () {
     const callAPI = async () => {
         try {
 
+            setLoading(true)
             const agent = new https.Agent({  
               rejectUnauthorized: false
             });
@@ -66,17 +54,58 @@ export default function Home () {
             }
         
             const data = await res.json();
-            setTotalEmissions(data["Total emissions"])
-            setEmissionIntensity(data["Emission intensity"])
-            console.log(data)
-            setAPICallComplete(true)
+            setTotalEmissions(parseEmissionData(data["Total emissions"]).map((item) => item/10))
+            setEmissionIntensity(parseEmissionData(data["Emission intensity"]))
+            console.log('data["Total emissions"]', data["Total emissions"])
+            console.log('data["Emission intensity"]', data["Emission intensity"])
+            console.log('parseEmissionData(data["Total emissions"])', parseEmissionData(data["Total emissions"]))
+            console.log('parseEmissionData(data["Emission intensity"])', parseEmissionData(data["Emission intensity"]))
+            console.log('totalEmissions', totalEmissions)
+            console.log('emissionIntensity', emissionIntensity)
+            console.log('data', data)
+            setLoading(false)
 
          } catch (error) {
 
             console.log(error);
-            setAPICallComplete(true)
+            setLoading(false)
          }
       }
+
+    const graphConfig = {
+        labels: monthShort,
+        datasets: [{
+            type: 'bar',
+            label: 'Total emissions (tCO2e)',
+            title: 'Total emissions (tCO2e)',
+            yAxisID: 'y1',
+            stack: 'stack 0',
+            data: totalEmissions,
+            backgroundColor: [
+            'rgba(0, 211, 185, 1)',
+            ],
+            borderColor: [
+            'rgba(3, 133, 117, 1)',
+            ],
+            borderWidth: 1,
+            order: 2
+        }, {
+            type: 'line',
+            label: 'Emissions Intensity (kgCO2e / m2)',
+            title: 'Emissions Intensity (kgCO2e / m2)',
+            yAxisID: 'y2',
+            stack: 'stack 0',
+            data: emissionIntensity,
+            backgroundColor: [
+                'rgba(167, 97, 193, 1)',
+            ],
+            borderColor: [
+                'rgba(167, 97, 193, 1)',
+            ],
+            borderWidth: 1,
+            order: 1
+        }]
+    }
 
     return (
             <div className={styles.wrapper}>
@@ -86,13 +115,51 @@ export default function Home () {
                 <Typography variant="h6" className={styles.subtitle}>
                     The carbon emissions dashboard of our chemical plant in Antwerp contains information on the emissions of our facility, as well as the emissions of the facilities in the surrounding area. This information is essential in order to monitor and reduce our carbon footprint.
                 </Typography>
+                {loading && (
+                    <div className={styles.loading}>
+                        <li>
+                            <LoadingSpin primaryColor="#00D39" />
+                        </li>
+                    </div>
+                )}
                     <div className={styles.graphWrapper}>
                         <Chart
                             data={graphConfig}
                             width={500}
                             height={500}
                             options={{
-                                maintainAspectRatio: false
+                                plugins: {
+                                    legend: {
+                                        title: {
+                                            text: 'Emissions over time',
+                                            display: true
+                                        }
+                                    }
+                                },
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y1: {
+                                        title: {
+                                            display: true,
+                                            text: 'Total emissions (tCO2e)'
+                                        },
+                                        type: 'linear',
+                                        position: 'left',
+                                        display: true,
+                                        max: Math.max(...[...totalEmissions, ...emissionIntensity])
+                                    },
+                                    y2: {
+                                        title: {
+                                            display: true,
+                                            text: 'Emissions Intensity (kgCO2e / m2)',
+                                        },
+                                        type: 'linear',
+                                        position: 'right',
+                                        display: true,
+                                        max: Math.max(...[...totalEmissions, ...emissionIntensity])
+                                    }
+                                  }     
+                                
                             }}
                         />
                     </div>
