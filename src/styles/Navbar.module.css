@@ -1,0 +1,30 @@
+.container {
+    background-color: white;
+    height: 100vh;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 20px;
+    background-color: #081015;
+  }
+  
+  .navbar ul {
+    display: flex;
+    list-style: none;
+    color: white;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+  } 
+  
+  .navbar li {
+    margin: 0 10px;
+  }
+
+  .navbar li:last-child {
+    margin-left: auto;
+    pointer-events: none;
+  }
