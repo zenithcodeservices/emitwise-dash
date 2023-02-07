@@ -1,11 +1,11 @@
-import Head from 'next/head'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
-import * as React from 'React'
-import Home from '../components/home'
-import Navbar from '@/components/navbar'
+import Head from "next/head";
+import { Inter } from "@next/font/google";
+import styles from "@/styles/Home.module.css";
+import * as React from "React";
+import Home from "../components/home";
+import Navbar from "@/components/navbar";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Layout() {
   return (
@@ -21,11 +21,11 @@ export default function Layout() {
         />
       </Head>
       <main className={styles.main}>
-      <div className={styles.container}>
-        <Navbar></Navbar>
-        <Home></Home>
-      </div>
+        <div className={styles.container}>
+          <Navbar></Navbar>
+          <Home></Home>
+        </div>
       </main>
     </>
-  )
+  );
 }
