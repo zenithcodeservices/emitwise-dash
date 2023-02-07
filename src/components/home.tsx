@@ -27,7 +27,8 @@ export default function Home () {
             borderColor: [
             'rgba(3, 133, 117, 1)',
             ],
-            borderWidth: 1
+            borderWidth: 1,
+            order: 2
         }, {
             type: 'line',
             label: 'Emissions Intensity',
@@ -38,7 +39,8 @@ export default function Home () {
             borderColor: [
                 'rgba(167, 97, 193, 1)',
             ],
-            borderWidth: 1
+            borderWidth: 1,
+            order: 1
         }]
     }
 
